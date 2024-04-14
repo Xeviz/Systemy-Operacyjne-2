@@ -1,0 +1,3 @@
+/home/linuxarc/CLionProjects/sysprojekt/cmake-build-debug/CMakeFiles/sysprojekt.dir
+/home/linuxarc/CLionProjects/sysprojekt/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/linuxarc/CLionProjects/sysprojekt/cmake-build-debug/CMakeFiles/rebuild_cache.dir
