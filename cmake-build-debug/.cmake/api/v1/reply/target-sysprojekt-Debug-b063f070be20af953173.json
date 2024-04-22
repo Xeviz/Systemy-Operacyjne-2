@@ -19,7 +19,7 @@
 		"files" : 
 		[
 			"CMakeLists.txt",
-			"/snap/clion/265/bin/cmake/linux/x64/share/cmake-3.27/Modules/FindOpenGL.cmake"
+			"/snap/clion/274/bin/cmake/linux/x64/share/cmake-3.28/Modules/FindOpenGL.cmake"
 		],
 		"nodes" : 
 		[
@@ -51,13 +51,13 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 682,
+				"line" : 673,
 				"parent" : 4
 			},
 			{
 				"command" : 4,
 				"file" : 1,
-				"line" : 680,
+				"line" : 671,
 				"parent" : 4
 			}
 		]

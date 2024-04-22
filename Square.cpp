@@ -3,7 +3,6 @@
 //
 
 #include "Square.h"
-#include <cmath>
 #include <GLFW/glfw3.h>
 #include <random>
 
@@ -19,7 +18,7 @@ float Square::getVelocity() const {
     return velocity;
 }
 
-float Square::getDirection() const {
+int Square::getDirection() const {
     return direction;
 }
 
@@ -33,7 +32,9 @@ float Square::getWidth() const {
 
 Square::Square(float posX, float posY, float height, float width, const std::mt19937 &gen)
         : pos_x(posX), pos_y(posY), height(height), width(width), gen(gen) {
+    sleepTime = 2000;
     direction = 1;
+    velocity = 0.005f;
     bounceAndReroll();
 }
 
@@ -73,8 +74,10 @@ void Square::moveSquare() {
 }
 
 void Square::bounceAndReroll(){
-    std::uniform_real_distribution<float> velocity_distribution(0.005f, 0.025f);
+    std::uniform_int_distribution<int> sleep_distribution(2000, 5000);
+    sleepTime = sleep_distribution(gen);
+}
 
-    velocity = velocity_distribution(gen);
-
+int Square::getSleepTime() const {
+    return sleepTime;
 }

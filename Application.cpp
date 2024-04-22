@@ -1,7 +1,3 @@
-//
-// Created by linuxarc on 06.04.24.
-//
-
 #include "Application.h"
 #include "Ball.h"
 #include "Square.h"
@@ -41,6 +37,8 @@ void Application::startApplication() {
     GeneratorThreadData generatorThreadData{&keepGenerating, generatorThread};
     SquareThreadData squareThreadData{&keepGenerating, square, squareThread};
 
+
+
     pthread_create(&generatorThreadData.thread, nullptr, generatorThreadRoutine, &generatorThreadData);
     pthread_create(&squareThreadData.thread, nullptr, squareThreadRoutine, &squareThreadData);
 
@@ -61,8 +59,6 @@ void Application::startApplication() {
             break;
         }
 
-
-
     }
 
     pthread_join(generatorThreadData.thread, nullptr);
@@ -70,27 +66,6 @@ void Application::startApplication() {
 
     std::cout << "rysowanie zakonczone" << std::endl;
     glfwTerminate();
-}
-
-void *Application::ballThreadRoutine(void* arg) {
-    auto* data = static_cast<BallThreadData*>(arg);
-    std::cout << "jestem piłeczką " << data->ball->getNumber() << std::endl;
-    while (data->ball->getTimeToLive() > 0) {
-        data->ball->moveBall();
-        data->ball->drawBall();
-        glfwPostEmptyEvent();
-        usleep(10000);
-    }
-    mtx.lock();
-    std::cout << "Wątek pileczki o numerze " << data->ball->getNumber() << " zakończył pracę." << std::endl;
-    auto it = std::find_if(ballThreads.rbegin(), ballThreads.rend(),
-                           [data](const BallThreadData* ballThreadData) { return ballThreadData == data; });
-    if (it != ballThreads.rend()) {
-        ballThreads.erase(std::next(it).base());
-    }
-    mtx.unlock();
-    delete data;
-    pthread_exit(nullptr);
 }
 
 void *Application::generatorThreadRoutine(void* arg) {
@@ -104,14 +79,11 @@ void *Application::generatorThreadRoutine(void* arg) {
     while (*data->keepGenerating){
 
         if(glfwGetTime()>lastCheckedTime+currentDelay){
-            mtx.lock();
             Ball* newBall = new Ball(0.0, -0.8, curNumber, 0.1, gen);
             pthread_t ballThread = 0;
-            auto* newBallThreadData = new BallThreadData{newBall, ballThread};
+            auto* newBallThreadData = new BallThreadData{data->keepGenerating, newBall, ballThread};
             pthread_create(&newBallThreadData->thread, nullptr, ballThreadRoutine, newBallThreadData);
             ballThreads.emplace_back(newBallThreadData);
-            mtx.unlock();
-
             currentDelay = delay_distribution(gen);
             lastCheckedTime = glfwGetTime();
             curNumber++;
@@ -123,12 +95,30 @@ void *Application::generatorThreadRoutine(void* arg) {
     pthread_exit(nullptr);
 }
 
+void *Application::ballThreadRoutine(void* arg) {
+    auto* data = static_cast<BallThreadData*>(arg);
+    std::cout << "jestem piłeczką " << data->ball->getNumber() << std::endl;
+    while (data->ball->getTimeToLive() > 0 && *data->keepGenerating) {
+        data->ball->moveBall();
+        usleep(data->ball->getSleepTime());
+    }
+    mtx.lock();
+    std::cout << "Wątek pileczki o numerze " << data->ball->getNumber() << " zakończył pracę." << std::endl;
+    auto it = std::find_if(ballThreads.rbegin(), ballThreads.rend(),
+                           [data](const BallThreadData* ballThreadData) { return ballThreadData == data; });
+    if (it != ballThreads.rend()) {
+        ballThreads.erase(std::next(it).base());
+    }
+    mtx.unlock();
+    delete data;
+    pthread_exit(nullptr);
+}
+
 void *Application::squareThreadRoutine(void* arg) {
     auto* data = static_cast<SquareThreadData*>(arg);
     while (*data->keepGenerating || !ballThreads.empty()) {
         data->square->moveSquare();
-        glfwPostEmptyEvent();
-        usleep(10000);
+        usleep(data->square->getSleepTime());
     }
     std::cout << "watek prostokata zakonczony" << std::endl;
     pthread_exit(nullptr);

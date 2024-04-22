@@ -13,6 +13,7 @@ Ball::Ball(float x, float y, int num, float rad, std::mt19937 gen) : pos_x(x), p
     rgb[1] = distribution(gen);
     rgb[2] = distribution(gen);
     timeToLive = 5;
+    sleepTime = 2000;
     initializeRandomDirectionAndVelocity();
 }
 
@@ -84,15 +85,19 @@ void Ball::moveBall() {
 }
 
 void Ball::initializeRandomDirectionAndVelocity() {
-    std::uniform_real_distribution<float> velocity_distribution(0.005f, 0.025f);
-    velocity = velocity_distribution(gen);
-
+    velocity = 0.005f;
     std::uniform_real_distribution<float> direction_distribution(1.0f, 180.0f);
+    std::uniform_int_distribution<int> sleep_distribution(2000, 5000);
+    sleepTime = sleep_distribution(gen);
     direction = direction_distribution(gen);
 }
 
 int Ball::getTimeToLive() const {
     return timeToLive;
+}
+
+int Ball::getSleepTime() const {
+    return sleepTime;
 }
 
 void Ball::reduceTTL() {

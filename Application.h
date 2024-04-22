@@ -16,6 +16,7 @@ class Application {
 
 private:
     struct BallThreadData {
+        bool* keepGenerating;
         Ball* ball;
         pthread_t thread;
     };

@@ -14,6 +14,7 @@ private:
     int number;
     float rgb[3]{};
     int timeToLive;
+    int sleepTime;
     std::mt19937 gen;
 public:
     [[nodiscard]] int getTimeToLive() const;
@@ -31,6 +32,7 @@ public:
     [[nodiscard]] float getG() const;
     [[nodiscard]] float getB() const;
     [[nodiscard]] int getNumber() const;
+    [[nodiscard]] int getSleepTime() const;
     void changePosition(float updatedX, float updatedY);
     void changeDirection(float updatedDirection);
     void reduceTTL();
