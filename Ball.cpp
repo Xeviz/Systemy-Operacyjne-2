@@ -6,6 +6,8 @@
 #include <cmath>
 #include <GLFW/glfw3.h>
 #include <random>
+#include <functional>
+#include <iostream>
 
 Ball::Ball(float x, float y, int num, float rad, std::mt19937 gen) : pos_x(x), pos_y(y), number(num), radius(rad), gen(gen) {
     std::uniform_real_distribution<float> distribution(0.0, 1.0);
@@ -14,6 +16,7 @@ Ball::Ball(float x, float y, int num, float rad, std::mt19937 gen) : pos_x(x), p
     rgb[2] = distribution(gen);
     timeToLive = 5;
     sleepTime = 2000;
+    isSticky = false;
     initializeRandomDirectionAndVelocity();
 }
 
@@ -84,10 +87,33 @@ void Ball::moveBall() {
     changePosition(new_x, new_y);
 }
 
+void Ball::moveStickyBall(Square square) {
+    float move_y = getVelocity() * square.getDirection();
+    float new_y = getY() + move_y;
+    pos_y = new_y;
+
+
+
+};
+
+void Ball::checkIfCollide(Square square) {
+    float closestX = std::clamp(pos_x, square.getPosX(), square.getPosX() + square.getWidth());
+    float closestY = std::clamp(pos_y, square.getPosY(), square.getPosY() + square.getHeight());
+
+    float distanceX = pos_x - closestX;
+    float distanceY = pos_y - closestY;
+
+    float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+    if (distanceSquared < (radius * radius) && !square.unstickBalls) {
+        isSticky = true;
+    }
+}
+
 void Ball::initializeRandomDirectionAndVelocity() {
-    velocity = 0.005f;
+    velocity = 0.001f;
     std::uniform_real_distribution<float> direction_distribution(1.0f, 180.0f);
-    std::uniform_int_distribution<int> sleep_distribution(2000, 5000);
+    std::uniform_int_distribution<int> sleep_distribution(400, 1200);
     sleepTime = sleep_distribution(gen);
     direction = direction_distribution(gen);
 }
@@ -103,6 +129,19 @@ int Ball::getSleepTime() const {
 void Ball::reduceTTL() {
     timeToLive--;
 }
+
+
+void Ball::bounceFromSquare(Square square) {
+    std::cout << number << "wydupcam x/y " << pos_x << ", " << pos_y << " direction " << getDirection() << std::endl;
+    if (pos_x - getRadius() < square.getPosX() || pos_x + getRadius() > square.getPosX()+square.getWidth()) {
+        changeDirection(180.0 - getDirection());
+    }
+
+    if (pos_y - getRadius() < square.getPosY() || pos_y + getRadius() > square.getPosY()+square.getHeight()) {
+        changeDirection(-getDirection());
+    }
+    isSticky = false;
+};
 
 void Ball::drawBall() const {
     glColor3f(getR(), getG(), getB());
@@ -121,3 +160,6 @@ void Ball::drawBall() const {
 
     glFlush();
 }
+
+
+

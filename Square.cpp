@@ -18,7 +18,7 @@ float Square::getVelocity() const {
     return velocity;
 }
 
-int Square::getDirection() const {
+float Square::getDirection() const {
     return direction;
 }
 
@@ -32,10 +32,11 @@ float Square::getWidth() const {
 
 Square::Square(float posX, float posY, float height, float width, const std::mt19937 &gen)
         : pos_x(posX), pos_y(posY), height(height), width(width), gen(gen) {
-    sleepTime = 2000;
-    direction = 1;
-    velocity = 0.005f;
+    sleepTime = 400;
+    direction = 1.0f;
+    velocity = 0.001f;
     bounceAndReroll();
+    unstickBalls = false;
 }
 
 Square::~Square() = default;
@@ -68,14 +69,19 @@ void Square::moveSquare() {
     } else if(new_y <= -0.90 && getDirection()==-1){
         bounceAndReroll();
         direction = 1;
-
+    }
+    if (new_y > -0.20 && new_y+height < 0.20){
+        unstickBalls = true;
+    } else {
+        unstickBalls = false;
     }
     pos_y = new_y;
 }
 
 void Square::bounceAndReroll(){
-    std::uniform_int_distribution<int> sleep_distribution(2000, 5000);
+    std::uniform_int_distribution<int> sleep_distribution(400, 1200);
     sleepTime = sleep_distribution(gen);
+
 }
 
 int Square::getSleepTime() const {

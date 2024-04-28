@@ -19,10 +19,16 @@ private:
         bool* keepGenerating;
         Ball* ball;
         pthread_t thread;
+        int* squareSleepTime;
+        float* squareDirection;
+        Square* square;
     };
     struct GeneratorThreadData {
         bool* keepGenerating;
         pthread_t thread;
+        int* squareSleepTime;
+        float* squareDirection;
+        Square* square;
     };
     struct SquareThreadData {
         bool* keepGenerating;

@@ -3,17 +3,16 @@
 
 #include <string>
 #include <random>
+#include "Square.h"
 
 class Ball {
 private:
     float pos_x;
     float pos_y;
     float velocity{};
-    float direction{};
     float radius;
     int number;
     float rgb[3]{};
-    int timeToLive;
     int sleepTime;
     std::mt19937 gen;
 public:
@@ -22,7 +21,9 @@ public:
 public:
     Ball(float x, float y, int num, float rad, std::mt19937 gen);
     ~Ball();
-
+    bool isSticky;
+    int timeToLive;
+    float direction{};
     [[nodiscard]] float getX() const;
     [[nodiscard]] float getY() const;
     [[nodiscard]] float getVelocity() const;
@@ -37,7 +38,10 @@ public:
     void changeDirection(float updatedDirection);
     void reduceTTL();
     void moveBall();
+    void moveStickyBall(Square square);
     void drawBall() const;
+    void checkIfCollide(Square square);
+    void bounceFromSquare(Square square);
 
 private:
     void initializeRandomDirectionAndVelocity();

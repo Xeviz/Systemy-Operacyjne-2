@@ -33,9 +33,11 @@ void Application::startApplication() {
     pthread_t generatorThread = 0;
     pthread_t squareThread = 0;
     auto* square = new Square(-0.7, 0.0, 0.35, 0.25, gen);
+    int* squareSleepTime = &square->sleepTime;
+    float* squareDirection = &square->direction;
 
-    GeneratorThreadData generatorThreadData{&keepGenerating, generatorThread};
     SquareThreadData squareThreadData{&keepGenerating, square, squareThread};
+    GeneratorThreadData generatorThreadData{&keepGenerating, generatorThread, squareSleepTime, squareDirection, square};
 
 
 
@@ -77,17 +79,15 @@ void *Application::generatorThreadRoutine(void* arg) {
 
 
     while (*data->keepGenerating){
-
         if(glfwGetTime()>lastCheckedTime+currentDelay){
             Ball* newBall = new Ball(0.0, -0.8, curNumber, 0.1, gen);
             pthread_t ballThread = 0;
-            auto* newBallThreadData = new BallThreadData{data->keepGenerating, newBall, ballThread};
+            auto* newBallThreadData = new BallThreadData{data->keepGenerating, newBall, ballThread, data->squareSleepTime, data->squareDirection, data->square};
             pthread_create(&newBallThreadData->thread, nullptr, ballThreadRoutine, newBallThreadData);
             ballThreads.emplace_back(newBallThreadData);
             currentDelay = delay_distribution(gen);
             lastCheckedTime = glfwGetTime();
             curNumber++;
-
             glfwPostEmptyEvent();
         }
     }
@@ -97,10 +97,15 @@ void *Application::generatorThreadRoutine(void* arg) {
 
 void *Application::ballThreadRoutine(void* arg) {
     auto* data = static_cast<BallThreadData*>(arg);
-    std::cout << "jestem piłeczką " << data->ball->getNumber() << std::endl;
+    std::cout << "jestem piłeczką " << data->ball->getNumber() << " sleep time square: " << *data->squareSleepTime << std::endl;
     while (data->ball->getTimeToLive() > 0 && *data->keepGenerating) {
-        data->ball->moveBall();
-        usleep(data->ball->getSleepTime());
+        if(!data->ball->isSticky) {
+            data->ball->moveBall();
+            usleep(data->ball->getSleepTime());
+        } else {
+            data->ball->moveStickyBall(*data->square);
+            usleep(*data->squareSleepTime);
+        }
     }
     mtx.lock();
     std::cout << "Wątek pileczki o numerze " << data->ball->getNumber() << " zakończył pracę." << std::endl;
@@ -119,6 +124,18 @@ void *Application::squareThreadRoutine(void* arg) {
     while (*data->keepGenerating || !ballThreads.empty()) {
         data->square->moveSquare();
         usleep(data->square->getSleepTime());
+        if(data->square->unstickBalls) {
+            for (auto& ballThreadData : ballThreads) {
+                if (ballThreadData->ball->isSticky) {
+                    ballThreadData->ball->timeToLive++;
+                    ballThreadData->ball->bounceFromSquare(*data->square);
+                }
+            }
+            data->square->unstickBalls = false;
+        }
+        for (auto& ballThreadData : ballThreads) {
+            ballThreadData->ball->checkIfCollide(*data->square);
+        }
     }
     std::cout << "watek prostokata zakonczony" << std::endl;
     pthread_exit(nullptr);
