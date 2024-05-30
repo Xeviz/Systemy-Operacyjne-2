@@ -38,10 +38,10 @@ public:
     void changeDirection(float updatedDirection);
     void reduceTTL();
     void moveBall();
-    void moveStickyBall(Square square);
+    void moveStickyBall(Square* square);
     void drawBall() const;
-    void checkIfCollide(Square square);
-    void bounceFromSquare(Square square);
+    void checkIfCollide(Square* square);
+    void bounceFromSquare();
 
 private:
     void initializeRandomDirectionAndVelocity();

@@ -87,8 +87,8 @@ void Ball::moveBall() {
     changePosition(new_x, new_y);
 }
 
-void Ball::moveStickyBall(Square square) {
-    float move_y = getVelocity() * square.getDirection();
+void Ball::moveStickyBall(Square* square) {
+    float move_y = getVelocity() * square->getDirection();
     float new_y = getY() + move_y;
     pos_y = new_y;
 
@@ -96,16 +96,16 @@ void Ball::moveStickyBall(Square square) {
 
 };
 
-void Ball::checkIfCollide(Square square) {
-    float closestX = std::clamp(pos_x, square.getPosX(), square.getPosX() + square.getWidth());
-    float closestY = std::clamp(pos_y, square.getPosY(), square.getPosY() + square.getHeight());
+void Ball::checkIfCollide(Square* square) {
+    float closestX = std::clamp(pos_x, square->getPosX(), square->getPosX() + square->getWidth());
+    float closestY = std::clamp(pos_y, square->getPosY(), square->getPosY() + square->getHeight());
 
     float distanceX = pos_x - closestX;
     float distanceY = pos_y - closestY;
 
     float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
 
-    if (distanceSquared < (radius * radius) && !square.unstickBalls) {
+    if (distanceSquared < (radius * radius) && !square->unstickBalls) {
         isSticky = true;
     }
 }
@@ -131,15 +131,7 @@ void Ball::reduceTTL() {
 }
 
 
-void Ball::bounceFromSquare(Square square) {
-    std::cout << number << "wydupcam x/y " << pos_x << ", " << pos_y << " direction " << getDirection() << std::endl;
-    if (pos_x - getRadius() < square.getPosX() || pos_x + getRadius() > square.getPosX()+square.getWidth()) {
-        changeDirection(180.0 - getDirection());
-    }
-
-    if (pos_y - getRadius() < square.getPosY() || pos_y + getRadius() > square.getPosY()+square.getHeight()) {
-        changeDirection(-getDirection());
-    }
+void Ball::bounceFromSquare() {
     isSticky = false;
 };
 

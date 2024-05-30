@@ -5,6 +5,7 @@
 #include "Square.h"
 #include <GLFW/glfw3.h>
 #include <random>
+#include <iostream>
 
 float Square::getPosX() const {
     return pos_x;
@@ -63,16 +64,13 @@ void Square::moveSquare() {
     float move_y = getVelocity() * getDirection();
     float new_y = getPosY() + move_y;
 
-    if(height + new_y >= 0.90 && getDirection()==1){
+    if(height + new_y >= 0.75 && getDirection()==1){
         bounceAndReroll();
         direction = -1;
-    } else if(new_y <= -0.90 && getDirection()==-1){
+        unstickBalls = true;
+    } else if(new_y <= -1.00 && getDirection()==-1){
         bounceAndReroll();
         direction = 1;
-    }
-    if (new_y > -0.20 && new_y+height < 0.20){
-        unstickBalls = true;
-    } else {
         unstickBalls = false;
     }
     pos_y = new_y;

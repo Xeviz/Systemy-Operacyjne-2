@@ -51,10 +51,11 @@ void Application::startApplication() {
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
             keepGenerating = false;
         }
+        square->drawSquare();
         for (auto& ballThreadData : ballThreads) {
             ballThreadData->ball->drawBall();
         }
-        square->drawSquare();
+
         glfwSwapBuffers(window);
 
         if(!keepGenerating && ballThreads.empty()) {
@@ -97,13 +98,17 @@ void *Application::generatorThreadRoutine(void* arg) {
 
 void *Application::ballThreadRoutine(void* arg) {
     auto* data = static_cast<BallThreadData*>(arg);
-    std::cout << "jestem piłeczką " << data->ball->getNumber() << " sleep time square: " << *data->squareSleepTime << std::endl;
+    std::cout << "jestem piłeczką " << data->ball->getNumber() << std::endl;
     while (data->ball->getTimeToLive() > 0 && *data->keepGenerating) {
         if(!data->ball->isSticky) {
+
+            mtx.lock();
+            data->ball->checkIfCollide(data->square);
+            mtx.unlock();
             data->ball->moveBall();
             usleep(data->ball->getSleepTime());
         } else {
-            data->ball->moveStickyBall(*data->square);
+            data->ball->moveStickyBall(data->square);
             usleep(*data->squareSleepTime);
         }
     }
@@ -128,13 +133,9 @@ void *Application::squareThreadRoutine(void* arg) {
             for (auto& ballThreadData : ballThreads) {
                 if (ballThreadData->ball->isSticky) {
                     ballThreadData->ball->timeToLive++;
-                    ballThreadData->ball->bounceFromSquare(*data->square);
+                    ballThreadData->ball->bounceFromSquare();
                 }
             }
-            data->square->unstickBalls = false;
-        }
-        for (auto& ballThreadData : ballThreads) {
-            ballThreadData->ball->checkIfCollide(*data->square);
         }
     }
     std::cout << "watek prostokata zakonczony" << std::endl;
