@@ -131,12 +131,14 @@ void *Application::squareThreadRoutine(void* arg) {
         data->square->moveSquare();
         usleep(data->square->getSleepTime());
         if(data->square->unstickBalls) {
+            mtx.lock();
             for (auto& ballThreadData : ballThreads) {
                 if (ballThreadData->ball->isSticky) {
                     ballThreadData->ball->timeToLive++;
                     ballThreadData->ball->bounceFromSquare();
                 }
             }
+            mtx.unlock();
         }
     }
     std::cout << "watek prostokata zakonczony" << std::endl;
