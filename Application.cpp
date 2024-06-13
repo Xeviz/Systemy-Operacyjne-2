@@ -102,10 +102,11 @@ void *Application::ballThreadRoutine(void* arg) {
     while (data->ball->getTimeToLive() > 0 && *data->keepGenerating) {
         if(!data->ball->isSticky) {
 
+            data->ball->moveBall();
             mtx.lock();
             data->ball->checkIfCollide(data->square);
             mtx.unlock();
-            data->ball->moveBall();
+
             usleep(data->ball->getSleepTime());
         } else {
             data->ball->moveStickyBall(data->square);
