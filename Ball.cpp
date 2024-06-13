@@ -17,6 +17,7 @@ Ball::Ball(float x, float y, int num, float rad, std::mt19937 gen) : pos_x(x), p
     timeToLive = 5;
     sleepTime = 2000;
     isSticky = false;
+    isFreezed = false;
     initializeRandomDirectionAndVelocity();
 }
 

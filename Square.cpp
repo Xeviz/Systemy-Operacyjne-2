@@ -38,6 +38,7 @@ Square::Square(float posX, float posY, float height, float width, const std::mt1
     velocity = 0.001f;
     bounceAndReroll();
     unstickBalls = false;
+    unfreezeBalls = false;
 }
 
 Square::~Square() = default;
@@ -68,10 +69,12 @@ void Square::moveSquare() {
         bounceAndReroll();
         direction = -1;
         unstickBalls = true;
+        unfreezeBalls = false;
     } else if(new_y <= -1.00 && getDirection()==-1){
         bounceAndReroll();
         direction = 1;
         unstickBalls = false;
+        unfreezeBalls = true;
     }
     pos_y = new_y;
 }

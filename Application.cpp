@@ -100,7 +100,10 @@ void *Application::ballThreadRoutine(void* arg) {
     auto* data = static_cast<BallThreadData*>(arg);
     std::cout << "jestem piłeczką " << data->ball->getNumber() << std::endl;
     while (data->ball->getTimeToLive() > 0 && *data->keepGenerating) {
-        if(!data->ball->isSticky) {
+        if (data->ball->isFreezed) {
+            usleep(*data->squareSleepTime);
+        }
+        else if(!data->ball->isSticky) {
 
             data->ball->moveBall();
             mtx.lock();
@@ -136,6 +139,15 @@ void *Application::squareThreadRoutine(void* arg) {
                 if (ballThreadData->ball->isSticky) {
                     ballThreadData->ball->timeToLive++;
                     ballThreadData->ball->bounceFromSquare();
+                    ballThreadData->ball->isFreezed = true;
+                }
+            }
+            mtx.unlock();
+        } else if (data->square->unfreezeBalls) {
+            mtx.lock();
+            for (auto& ballThreadData : ballThreads) {
+                if (ballThreadData->ball->isFreezed) {
+                    ballThreadData->ball->isFreezed = false;
                 }
             }
             mtx.unlock();

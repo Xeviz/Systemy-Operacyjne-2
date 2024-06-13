@@ -22,6 +22,7 @@ public:
     Ball(float x, float y, int num, float rad, std::mt19937 gen);
     ~Ball();
     bool isSticky;
+    bool isFreezed;
     int timeToLive;
     float direction{};
     [[nodiscard]] float getX() const;

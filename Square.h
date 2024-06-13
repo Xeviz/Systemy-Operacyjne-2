@@ -24,6 +24,7 @@ private:
     float direction;
     int sleepTime;
     bool unstickBalls;
+    bool unfreezeBalls;
     [[nodiscard]] float getPosX() const;
     [[nodiscard]] float getPosY() const;
     [[nodiscard]] float getVelocity() const;
